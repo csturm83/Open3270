@@ -22,7 +22,6 @@
  */
 #endregion
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Open3270.TN3270
@@ -123,8 +122,8 @@ namespace Open3270.TN3270
 		{
 			return action(args);
 		}
-		ArrayList datacapture = null;
-		ArrayList datastringcapture = null;
+		List<byte[]> datacapture = null;
+		List<string> datastringcapture = null;
 		public void action_output(string data)
 		{
 			action_output(data, false);
@@ -140,9 +139,9 @@ namespace Open3270.TN3270
 		public void action_output(string data, bool encode)
 		{
 			if (datacapture == null)
-				datacapture = new ArrayList();
+				datacapture = new List<byte[]>();
 			if (datastringcapture == null)
-				datastringcapture = new ArrayList();
+				datastringcapture = new List<string>();
 
 			datacapture.Add(System.Text.Encoding.ASCII.GetBytes(data));
 			//
@@ -160,9 +159,9 @@ namespace Open3270.TN3270
 		public void action_output(byte[] data, int length, bool encode)
 		{
 			if (datacapture == null)
-				datacapture = new ArrayList();
+				datacapture = new List<byte[]>();
 			if (datastringcapture == null)
-				datastringcapture = new ArrayList();
+				datastringcapture = new List<string>();
 
 			//
 			byte[] temp = new byte[length];
@@ -185,7 +184,7 @@ namespace Open3270.TN3270
 			if (datastringcapture == null)
 				return null;
 			if (index >= 0 && index < datastringcapture.Count)
-				return (string)datastringcapture[index];
+				return datastringcapture[index];
 			else
 				return null;
 		}
@@ -194,7 +193,7 @@ namespace Open3270.TN3270
 			if (datacapture == null)
 				return null;
 			if (index >= 0 && index < datacapture.Count)
-				return (byte[])datacapture[index];
+				return datacapture[index];
 			else
 				return null;
 		}
