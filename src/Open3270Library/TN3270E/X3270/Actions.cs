@@ -32,6 +32,8 @@ namespace Open3270.TN3270
 	{
 		private readonly Dictionary<string, XtActionRec> _actions;
 		private readonly Telnet _telnet;
+		private List<byte[]> datacapture = null;
+		private List<string> datastringcapture = null;
 
 		internal Actions(Telnet tn)
 		{
@@ -122,8 +124,7 @@ namespace Open3270.TN3270
 		{
 			return action(args);
 		}
-		List<byte[]> datacapture = null;
-		List<string> datastringcapture = null;
+		
 		public void action_output(string data)
 		{
 			action_output(data, false);
