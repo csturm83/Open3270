@@ -23,6 +23,7 @@
 #endregion
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Open3270.TN3270
 {
@@ -30,69 +31,65 @@ namespace Open3270.TN3270
 
 	internal class Actions
 	{
-
-		XtActionRec[] actions = null;
-		int actionCount;
-		Telnet telnet;
+		private readonly Dictionary<string, XtActionRec> _actions;
+		private readonly Telnet _telnet;
 
 		internal Actions(Telnet tn)
 		{
+			_telnet = tn;
+			_actions = new Dictionary<string, XtActionRec> {
+				{"printtext",     new XtActionRec( false,    new ActionDelegate(_telnet.Print.PrintTextAction )) },
+				{"flip",          new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.FlipAction )) },
+				{"ascii",         new XtActionRec( false,    new ActionDelegate(_telnet.Controller.AsciiAction )) },
+				{"dumpxml",       new XtActionRec( false,    new ActionDelegate(_telnet.Controller.DumpXMLAction )) },
+				{"asciifield",    new XtActionRec( false,    new ActionDelegate(_telnet.Controller.AsciiFieldAction )) },
+				{"attn",          new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.AttnAction )) },
+				{"backspace",     new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.BackSpaceAction )) },
+				{"backtab",       new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.BackTab_action )) },
+				{"circumnot",     new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.CircumNotAction )) },
+				{"clear",         new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.ClearAction )) },
+				{"cursorselect",  new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.CursorSelectAction )) },
+				{"delete",        new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.DeleteAction )) },
+				{"deletefield",   new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.DeleteFieldAction )) },
+				{"deleteword",    new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.DeleteWordAction )) },
+				{"down",          new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.MoveCursorDown )) },
+				{"dup",           new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.DupAction )) },
+				{"emulateinput",  new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.EmulateInputAction )) },
+				{"enter",         new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.EnterAction )) },
+				{"erase",         new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.EraseAction )) },
+				{"eraseeof",      new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.EraseEndOfFieldAction )) },
+				{"eraseinput",    new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.EraseInputAction)) },
+				{"fieldend",      new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.FieldEndAction )) },
+				{"fields",        new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.FieldsAction )) },
+				{"fieldget",      new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.FieldGetAction )) },
+				{"fieldset",      new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.FieldSetAction )) },
+				{"fieldmark",     new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.FieldMarkAction )) },
+				{"fieldexit",     new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.FieldExitAction )) },
+				{"hexString",     new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.HexStringAction )) },
+				{"home",          new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.HomeAction )) },
+				{"insert",        new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.InsertAction )) },
+				{"interrupt",     new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.InterruptAction )) },
+				{"key",           new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.SendKeyAction )) },
+				{"left",          new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.LeftAction )) },
+				{"left2",         new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.MoveCursorLeft2Positions )) },
+				{"monocase",      new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.MonoCaseAction )) },
+				{"movecursor",    new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.MoveCursorAction )) },
+				{"Newline",       new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.MoveCursorToNewLine)) },
+				{"NextWord",      new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.MoveCursorToNextUnprotectedWord )) },
+				{"PA",            new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.PAAction )) },
+				{"PF",            new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.PFAction )) },
+				{"PreviousWord",  new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.PreviousWordAction )) },
+				{"Reset",         new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.ResetAction )) },
+				{"Right",         new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.MoveRight )) },
+				{"Right2",        new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.MoveCursorRight2Positions )) },
+				{"String",        new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.SendStringAction )) },
+				{"SysReq",        new XtActionRec( true,     new ActionDelegate(_telnet.Keyboard.SystemRequestAction )) },
+				{"Tab",           new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.TabForwardAction )) },
+				{"ToggleInsert",  new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.ToggleInsertAction )) },
+				{"ToggleReverse", new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.ToggleReverseAction )) },
+				{"Up",            new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.MoveCursorUp )) }
 
-			telnet = tn;
-			actions = new XtActionRec[] {
-					new XtActionRec( "printtext",	false,	new ActionDelegate(telnet.Print.PrintTextAction )),
-					new XtActionRec( "flip",		false,	new ActionDelegate(telnet.Keyboard.FlipAction )),
-					new XtActionRec( "ascii",		false,	new ActionDelegate(telnet.Controller.AsciiAction )),
-					new XtActionRec( "dumpxml",		false,	new ActionDelegate(telnet.Controller.DumpXMLAction )),
-					new XtActionRec( "asciifield",	false,	new ActionDelegate(telnet.Controller.AsciiFieldAction )),
-					new XtActionRec( "attn",		true,	new ActionDelegate(telnet.Keyboard.AttnAction )),
-					new XtActionRec( "backspace",	false,	new ActionDelegate(telnet.Keyboard.BackSpaceAction )),
-					new XtActionRec( "backtab",		false,	new ActionDelegate(telnet.Keyboard.BackTab_action )),
-					new XtActionRec( "circumnot",	false,	new ActionDelegate(telnet.Keyboard.CircumNotAction )),
-					new XtActionRec( "clear",		true,	new ActionDelegate(telnet.Keyboard.ClearAction )),
-					new XtActionRec( "cursorselect", false,	new ActionDelegate(telnet.Keyboard.CursorSelectAction )),
-					new XtActionRec( "delete", 		 false,	new ActionDelegate(telnet.Keyboard.DeleteAction )),
-					new XtActionRec( "deletefield",	 false,	new ActionDelegate(telnet.Keyboard.DeleteFieldAction )),
-					new XtActionRec( "deleteword",	 false, new ActionDelegate(telnet.Keyboard.DeleteWordAction )),
-					new XtActionRec( "down",		 false, new ActionDelegate(telnet.Keyboard.MoveCursorDown )),
-					new XtActionRec( "dup",			 false, new ActionDelegate(telnet.Keyboard.DupAction )),
-					new XtActionRec("emulateinput",  true,	new ActionDelegate(telnet.Keyboard.EmulateInputAction )),
-					new XtActionRec( "enter",		 true,	new ActionDelegate(telnet.Keyboard.EnterAction )),
-					new XtActionRec( "erase",		 false, new ActionDelegate(telnet.Keyboard.EraseAction )),
-					new XtActionRec( "eraseeof",	 false, new ActionDelegate(telnet.Keyboard.EraseEndOfFieldAction )),
-					new XtActionRec( "eraseinput",	 false, new ActionDelegate(telnet.Keyboard.EraseInputAction )),
-					new XtActionRec( "fieldend",	false,	new ActionDelegate(telnet.Keyboard.FieldEndAction )),
-					new XtActionRec( "fields",		false,	new ActionDelegate(telnet.Keyboard.FieldsAction )),
-					new XtActionRec( "fieldget",	false,	new ActionDelegate(telnet.Keyboard.FieldGetAction )),
-					new XtActionRec( "fieldset",	false,	new ActionDelegate(telnet.Keyboard.FieldSetAction )),
-					new XtActionRec( "fieldmark",	false,	new ActionDelegate(telnet.Keyboard.FieldMarkAction )),
-					new XtActionRec( "fieldexit",	false,	new ActionDelegate(telnet.Keyboard.FieldExitAction )),
-					new XtActionRec( "hexString",	false,	new ActionDelegate(telnet.Keyboard.HexStringAction)),
-					new XtActionRec( "home",		false,  new ActionDelegate(telnet.Keyboard.HomeAction )),
-					new XtActionRec( "insert",		false,  new ActionDelegate(telnet.Keyboard.InsertAction )),
-					new XtActionRec( "interrupt",	true, 	new ActionDelegate(telnet.Keyboard.InterruptAction )),
-					new XtActionRec( "key",			false,  new ActionDelegate(telnet.Keyboard.SendKeyAction )),
-					new XtActionRec( "left",		false,  new ActionDelegate(telnet.Keyboard.LeftAction )),
-					new XtActionRec( "left2", 		false,  new ActionDelegate(telnet.Keyboard.MoveCursorLeft2Positions )),
-					new XtActionRec( "monocase",	false, 	new ActionDelegate(telnet.Keyboard.MonoCaseAction )),
-					new XtActionRec( "movecursor",	false,	new ActionDelegate(telnet.Keyboard.MoveCursorAction )),
-					new XtActionRec( "Newline",		false,	new ActionDelegate(telnet.Keyboard.MoveCursorToNewLine )),
-					new XtActionRec( "NextWord",	false,	new ActionDelegate(telnet.Keyboard.MoveCursorToNextUnprotectedWord )),
-					new XtActionRec( "PA",			true,   new ActionDelegate(telnet.Keyboard.PAAction )),
-					new XtActionRec( "PF",			true,   new ActionDelegate(telnet.Keyboard.PFAction )),
-					new XtActionRec( "PreviousWord",false,	new ActionDelegate(telnet.Keyboard.PreviousWordAction )),
-					new XtActionRec( "Reset",		true,  new ActionDelegate(telnet.Keyboard.ResetAction )),
-					new XtActionRec( "Right",		false,	new ActionDelegate(telnet.Keyboard.MoveRight )),
-					new XtActionRec( "Right2",		false,	new ActionDelegate(telnet.Keyboard.MoveCursorRight2Positions )),
-					new XtActionRec( "String",		true,	new ActionDelegate(telnet.Keyboard.SendStringAction )),
-					new XtActionRec( "SysReq",		true,	new ActionDelegate(telnet.Keyboard.SystemRequestAction )),
-					new XtActionRec( "Tab",			false,  new ActionDelegate(telnet.Keyboard.TabForwardAction )),
-					new XtActionRec( "ToggleInsert", false,	new ActionDelegate(telnet.Keyboard.ToggleInsertAction )),
-					new XtActionRec( "ToggleReverse",false,	new ActionDelegate(telnet.Keyboard.ToggleReverseAction )),
-					new XtActionRec( "Up",			false,	new ActionDelegate(telnet.Keyboard.MoveCursorUp )),
-				};
-
-			actionCount = actions.Length;
+			};
 		}
 
 		//public iaction ia_cause;
@@ -108,12 +105,12 @@ namespace Open3270.TN3270
 		 */
 		string action_name(ActionDelegate action)
 		{
-			int i;
-
-			for (i = 0; i < actionCount; i++)
+			foreach (KeyValuePair<string, XtActionRec> xtAct in _actions)
 			{
-				if (actions[i].proc == action)
-					return actions[i].name;
+				if (xtAct.Value.Proc == action)
+				{
+					return xtAct.Key;
+				}
 			}
 			return "(unknown)";
 		}
@@ -126,7 +123,6 @@ namespace Open3270.TN3270
 		{
 			return action(args);
 		}
-		Hashtable actionLookup = new Hashtable();
 		ArrayList datacapture = null;
 		ArrayList datastringcapture = null;
 		public void action_output(string data)
@@ -204,66 +200,44 @@ namespace Open3270.TN3270
 		}
 		public bool KeyboardCommandCausesSubmit(string name)
 		{
-			XtActionRec rec = actionLookup[name.ToLower()] as XtActionRec;
-			if (rec != null)
+			if (null == name || !_actions.ContainsKey(name))
 			{
-				return rec.CausesSubmit;
+				throw new ApplicationException("Sorry, action '" + name + "' is not known");
 			}
-
-			for (int i = 0; i < actions.Length; i++)
-			{
-				if (actions[i].name.ToLower() == name.ToLower())
-				{
-					actionLookup[name.ToLower()] = actions[i];
-					return actions[i].CausesSubmit;
-				}
-			}
-
-			throw new ApplicationException("Sorry, action '" + name + "' is not known");
+			return _actions[name].CausesSubmit;
 		}
 		public bool Execute(bool submit, string name, params object[] args)
 		{
-			this.telnet.Events.Clear();
+			_telnet.Events.Clear();
 			// Check that we're connected
-			if (!telnet.IsConnected)
+			if (!_telnet.IsConnected)
 			{
-				throw new Open3270.TNHostException("TN3270 Host is not connected", telnet.DisconnectReason, null);
+				throw new Open3270.TNHostException("TN3270 Host is not connected", _telnet.DisconnectReason, null);
 			}
 
 			datacapture = null;
 			datastringcapture = null;
-			XtActionRec rec = actionLookup[name.ToLower()] as XtActionRec;
-			if (rec != null)
-			{
-				return rec.proc(args);
-			}
-			int i;
-			for (i = 0; i < actions.Length; i++)
-			{
-				if (actions[i].name.ToLower() == name.ToLower())
-				{
-					actionLookup[name.ToLower()] = actions[i];
-					return actions[i].proc(args);
-				}
-			}
-			throw new ApplicationException("Sorry, action '" + name + "' is not known");
 
+			if (null == name || !_actions.ContainsKey(name))
+			{
+				throw new ApplicationException("Sorry, action '" + name + "' is not known");
+			}
+			return _actions[name].Proc(args);
 		}
 
 
 
 		#region Nested classes
 
-		internal class XtActionRec
+		private class XtActionRec
 		{
-			public ActionDelegate proc;
-			public string name;
-			public bool CausesSubmit;
-			public XtActionRec(string name, bool CausesSubmit, ActionDelegate fn)
+			public ActionDelegate Proc { get; }
+			public bool CausesSubmit { get; }
+
+			public XtActionRec(bool causesSubmit, ActionDelegate fn)
 			{
-				this.CausesSubmit = CausesSubmit;
-				this.proc = fn;
-				this.name = name.ToLower();
+				CausesSubmit = causesSubmit;
+				Proc = fn;
 			}
 		}
 
