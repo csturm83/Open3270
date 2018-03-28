@@ -38,7 +38,7 @@ namespace Open3270.TN3270
 		internal Actions(Telnet tn)
 		{
 			_telnet = tn;
-			_actions = new Dictionary<string, XtActionRec> {
+			_actions = new Dictionary<string, XtActionRec>(StringComparer.OrdinalIgnoreCase) {
 				{"printtext",     new XtActionRec( false,    new ActionDelegate(_telnet.Print.PrintTextAction )) },
 				{"flip",          new XtActionRec( false,    new ActionDelegate(_telnet.Keyboard.FlipAction )) },
 				{"ascii",         new XtActionRec( false,    new ActionDelegate(_telnet.Controller.AsciiAction )) },
