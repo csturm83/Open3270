@@ -383,7 +383,7 @@ namespace Open3270.TN3270
             // instead of converting mScreenRows to StringBuilder 
             // and then converting it to a string.
 
-			HashAlgorithm hash = (HashAlgorithm)CryptoConfig.CreateFromName("MD5");
+			HashAlgorithm hash = new SHA256CryptoServiceProvider();
 			StringBuilder builder = new StringBuilder();
 			for (i=0; i<mScreenRows.Length; i++)
 			{
