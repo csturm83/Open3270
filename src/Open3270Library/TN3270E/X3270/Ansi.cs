@@ -117,8 +117,8 @@ namespace Open3270.TN3270
 		private readonly int[] n = new int[NN];
 		private readonly int[] csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
 		private readonly int[] saved_csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
+		private readonly AnsiDelegate[] ansi_fn;
 
-		private AnsiDelegate[] ansi_fn;
 		private int saved_cursor = 0;
 		private int nx = 0;
 		private string text;//char     text[NT + 1];
@@ -156,27 +156,20 @@ namespace Open3270.TN3270
 
 		internal Ansi(Telnet telnet)
 		{
-
 			this.telnet = telnet;
-			Initialize_ansi_fn();
-			InitializeST();
-		}
-
-		private void Initialize_ansi_fn()
-		{
 			ansi_fn = new AnsiDelegate[] {
 
 
-											 /* 0 */		new AnsiDelegate(ansi_data_mode),
-											 /* 1 */		new AnsiDelegate(dec_save_cursor),
-											 /* 2 */		new AnsiDelegate(dec_restore_cursor),
-											 /* 3 */		new AnsiDelegate(ansi_newline),
-											 /* 4 */		new AnsiDelegate(ansi_cursor_up),
-											 /* 5 */		new AnsiDelegate(ansi_esc2),
-											 /* 6 */		new AnsiDelegate(ansi_reset),
-											 /* 7 */		new AnsiDelegate(ansi_insert_chars),
-											 /* 8 */		new AnsiDelegate(ansi_cursor_down),
-											 /* 9 */		new AnsiDelegate(ansi_cursor_right),
+											 /* 0 */	new AnsiDelegate(ansi_data_mode),
+											 /* 1 */	new AnsiDelegate(dec_save_cursor),
+											 /* 2 */	new AnsiDelegate(dec_restore_cursor),
+											 /* 3 */	new AnsiDelegate(ansi_newline),
+											 /* 4 */	new AnsiDelegate(ansi_cursor_up),
+											 /* 5 */	new AnsiDelegate(ansi_esc2),
+											 /* 6 */	new AnsiDelegate(ansi_reset),
+											 /* 7 */	new AnsiDelegate(ansi_insert_chars),
+											 /* 8 */	new AnsiDelegate(ansi_cursor_down),
+											 /* 9 */	new AnsiDelegate(ansi_cursor_right),
 											 /* 10 */	new AnsiDelegate(ansi_cursor_left),
 											 /* 11 */	new AnsiDelegate(ansi_cursor_motion),
 											 /* 12 */	new AnsiDelegate(ansi_erase_in_display),
@@ -223,8 +216,9 @@ namespace Open3270.TN3270
 											 /* 53 */	new AnsiDelegate(ansi_one_g2),
 											 /* 54 */	new AnsiDelegate(ansi_one_g3)
 										 };
+			InitializeST();
 		}
-
+		
 		private void InitializeST()
 		{
 			/*
