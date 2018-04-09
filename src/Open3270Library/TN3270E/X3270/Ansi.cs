@@ -52,72 +52,72 @@ namespace Open3270.TN3270
             Initialize_ansi_fn();
             InitializeST();
         }
-        public const int CS_G0 = 0;
-        public const int CS_G1 = 1;
-        public const int CS_G2 = 2;
-        public const int CS_G3 = 3;
+        private const int CS_G0 = 0;
+		private const int CS_G1 = 1;
+		private const int CS_G2 = 2;
+		private const int CS_G3 = 3;
 
 
-        public const int CSD_LD = 0;
-        public const int CSD_UK = 1;
-        public const int CSD_US = 2;
-        public const int DEFAULT_CGEN = 0x02b90000;
-        public const int DEFAULT_CSET = 0x00000025;
+		private const int CSD_LD = 0;
+		private const int CSD_UK = 1;
+		private const int CSD_US = 2;
+		private const int DEFAULT_CGEN = 0x02b90000;
+		private const int DEFAULT_CSET = 0x00000025;
 
-        public byte SC = 1;	/* save cursor position */
-        public byte RC = 2;	/* restore cursor position */
-        public byte NL = 3;	/* new line */
-        public byte UP = 4;	/* cursor up */
-        public byte E2 = 5;	/* second level of ESC processing */
-        public byte rS = 6;	/* reset */
-        public byte IC = 7;	/* insert chars */
-        public byte DN = 8;	/* cursor down */
-        public byte RT = 9;	/* cursor right */
-        public byte LT = 10;	/* cursor left */
-        public byte CM = 11;	/* cursor motion */
-        public byte ED = 12;	/* erase in display */
-        public byte EL = 13;	/* erase in line */
-        public byte IL = 14;	/* insert lines */
-        public byte DL = 15;	/* delete lines */
-        public byte DC = 16;	/* delete characters */
-        public byte SG = 17;	/* set graphic rendition */
-        public byte BL = 18;	/* ring bell */
-        public byte NP = 19;	/* new page */
-        public byte BS = 20;	/* backspace */
-        public byte CR = 21;	/* carriage return */
-        public byte LF = 22;	/* line feed */
-        public byte HT = 23;	/* horizontal tab */
-        public byte E1 = 24;	/* first level of ESC processing */
-        public byte Xx = 25;	/* undefined control character (nop) */
-        public byte Pc = 26;	/* printing character */
-        public byte Sc = 27;	/* semicolon (after ESC [) */
-        public byte Dg = 28;	/* digit (after ESC [ or ESC [ ?) */
-        public byte RI = 29;	/* reverse index */
-        public byte DA = 30;	/* send device attributes */
-        public byte SM = 31;	/* set mode */
-        public byte RM = 32;	/* reset mode */
-        public byte DO = 33;	/* return terminal ID (obsolete) */
-        public byte SR = 34;	/* device status report */
-        public byte CS = 35;	/* character set designate */
-        public byte E3 = 36;	/* third level of ESC processing */
-        public byte DS = 37;	/* DEC private set */
-        public byte DR = 38;	/* DEC private reset */
-        public byte DV = 39;	/* DEC private save */
-        public byte DT = 40;	/* DEC private restore */
-        public byte SS = 41;	/* set scrolling region */
-        public byte TM = 42;	/* text mode (ESC ]) */
-        public byte T2 = 43;	/* semicolon (after ESC ]) */
-        public byte TX = 44;	/* text parameter (after ESC ] n ;) */
-        public byte TB = 45;	/* text parameter done (ESC ] n ; xxx BEL) */
-        public byte TS = 46;	/* tab set */
-        public byte TC = 47;	/* tab clear */
-        public byte C2 = 48;	/* character set designate (finish) */
-        public byte G0 = 49;	/* select G0 character set */
-        public byte G1 = 50;	/* select G1 character set */
-        public byte G2 = 51;	/* select G2 character set */
-        public byte G3 = 52;	/* select G3 character set */
-        public byte S2 = 53;	/* select G2 for next character */
-        public byte S3 = 54;	/* select G3 for next character */
+		private byte SC = 1;    /* save cursor position */
+		private byte RC = 2;    /* restore cursor position */
+		private byte NL = 3;    /* new line */
+		private byte UP = 4;    /* cursor up */
+		private byte E2 = 5;    /* second level of ESC processing */
+		private byte rS = 6;    /* reset */
+		private byte IC = 7;    /* insert chars */
+		private byte DN = 8;    /* cursor down */
+		private byte RT = 9;    /* cursor right */
+		private byte LT = 10;   /* cursor left */
+		private byte CM = 11;   /* cursor motion */
+		private byte ED = 12;   /* erase in display */
+		private byte EL = 13;   /* erase in line */
+		private byte IL = 14;   /* insert lines */
+		private byte DL = 15;   /* delete lines */
+		private byte DC = 16;   /* delete characters */
+		private byte SG = 17;   /* set graphic rendition */
+		private byte BL = 18;   /* ring bell */
+		private byte NP = 19;   /* new page */
+		private byte BS = 20;   /* backspace */
+		private byte CR = 21;   /* carriage return */
+		private byte LF = 22;   /* line feed */
+		private byte HT = 23;   /* horizontal tab */
+		private byte E1 = 24;   /* first level of ESC processing */
+		private byte Xx = 25;   /* undefined control character (nop) */
+		private byte Pc = 26;   /* printing character */
+		private byte Sc = 27;   /* semicolon (after ESC [) */
+		private byte Dg = 28;   /* digit (after ESC [ or ESC [ ?) */
+		private byte RI = 29;   /* reverse index */
+		private byte DA = 30;   /* send device attributes */
+		private byte SM = 31;   /* set mode */
+		private byte RM = 32;   /* reset mode */
+		private byte DO = 33;   /* return terminal ID (obsolete) */
+		private byte SR = 34;   /* device status report */
+		private byte CS = 35;   /* character set designate */
+		private byte E3 = 36;   /* third level of ESC processing */
+		private byte DS = 37;   /* DEC private set */
+		private byte DR = 38;   /* DEC private reset */
+		private byte DV = 39;   /* DEC private save */
+		private byte DT = 40;   /* DEC private restore */
+		private byte SS = 41;   /* set scrolling region */
+		private byte TM = 42;   /* text mode (ESC ]) */
+		private byte T2 = 43;   /* semicolon (after ESC ]) */
+		private byte TX = 44;   /* text parameter (after ESC ] n ;) */
+		private byte TB = 45;   /* text parameter done (ESC ] n ; xxx BEL) */
+		private byte TS = 46;   /* tab set */
+		private byte TC = 47;   /* tab clear */
+		private byte C2 = 48;   /* character set designate (finish) */
+		private byte G0 = 49;   /* select G0 character set */
+		private byte G1 = 50;   /* select G1 character set */
+		private byte G2 = 51;   /* select G2 character set */
+		private byte G3 = 52;   /* select G3 character set */
+		private byte S2 = 53;   /* select G2 for next character */
+		private byte S3 = 54;	/* select G3 for next character */
 
         private AnsiDelegate[] ansi_fn;
         private void Initialize_ansi_fn()
@@ -350,48 +350,48 @@ namespace Open3270.TN3270
         }
 
 
-        public int saved_cursor = 0;
-        public const int NN = 20;
-        public int[] n = new int[NN];
-        public int nx = 0;
-        public const int NT = 256;
-        public string text;//char     text[NT + 1];
-        public int tx = 0;
-        public char ansi_ch;
-        public byte gr = 0;
-        public byte saved_gr = 0;
-        public byte fg = 0;
-        public byte saved_fg = 0;
-        public byte bg = 0;
-        public byte saved_bg = 0;
-        public int cset = CS_G0;
-        public int saved_cset = CS_G0;
-        public int[] csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
-        public int[] saved_csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
-        public int once_cset = -1;
-        public bool ansi_insert_mode = false;
-        public bool auto_newline_mode = false;
-        public int appl_cursor = 0;
-        public int saved_appl_cursor = 0;
-        public bool wraparound_mode = true;
-        public bool saved_wraparound_mode = true;
-        public bool rev_wraparound_mode = false;
-        public bool saved_rev_wraparound_mode = false;
-        public bool allow_wide_mode = false;
-        public bool saved_allow_wide_mode = false;
-        public bool wide_mode = false;
-        public bool saved_wide_mode = false;
-        public bool saved_altbuffer = false;
-        public int scroll_top = -1;
+		private int saved_cursor = 0;
+		private const int NN = 20;
+		private int[] n = new int[NN];
+		private int nx = 0;
+		private const int NT = 256;
+		private string text;//char     text[NT + 1];
+		private int tx = 0;
+		private char ansi_ch;
+		private byte gr = 0;
+		private byte saved_gr = 0;
+		private byte fg = 0;
+		private byte saved_fg = 0;
+		private byte bg = 0;
+		private byte saved_bg = 0;
+		private int cset = CS_G0;
+		private int saved_cset = CS_G0;
+		private int[] csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
+		private int[] saved_csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
+		private int once_cset = -1;
+		private bool ansi_insert_mode = false;
+		private bool auto_newline_mode = false;
+		private int appl_cursor = 0;
+		private int saved_appl_cursor = 0;
+		private bool wraparound_mode = true;
+		private bool saved_wraparound_mode = true;
+		private bool rev_wraparound_mode = false;
+		private bool saved_rev_wraparound_mode = false;
+		private bool allow_wide_mode = false;
+		private bool saved_allow_wide_mode = false;
+		private bool wide_mode = false;
+		private bool saved_wide_mode = false;
+		private bool saved_altbuffer = false;
+		private int scroll_top = -1;
 
-        public int scroll_bottom = -1;
-        public byte[] tabs = null;
-        public string gnnames = "()*+";
-        public string csnames = "0AB";
-        public int cs_to_change;
-        public bool held_wrap = false;
+		private int scroll_bottom = -1;
+		private byte[] tabs = null;
+		private string gnnames = "()*+";
+		private string csnames = "0AB";
+		private int cs_to_change;
+		private bool held_wrap = false;
 
-        public AnsiState state;
+		private AnsiState state;
 
 
 
@@ -470,7 +470,7 @@ namespace Open3270.TN3270
             return AnsiState.N1;
         }
 
-        bool ansi_reset__first = false;
+        private bool ansi_reset__first = false;
         AnsiState ansi_reset(int ig1, int ig2)
         {
             int i;
