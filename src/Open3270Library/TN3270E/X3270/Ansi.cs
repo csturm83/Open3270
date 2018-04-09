@@ -44,19 +44,15 @@ namespace Open3270.TN3270
 	/// </summary>
     internal class Ansi:IDisposable
     {
-        private readonly Telnet telnet;
-        
         private const int CS_G0 = 0;
 		private const int CS_G1 = 1;
 		private const int CS_G2 = 2;
 		private const int CS_G3 = 3;
-		
 		private const int CSD_LD = 0;
 		private const int CSD_UK = 1;
 		private const int CSD_US = 2;
 		private const int DEFAULT_CGEN = 0x02b90000;
 		private const int DEFAULT_CSET = 0x00000025;
-
 		private const byte SC = 1;    /* save cursor position */
 		private const byte RC = 2;    /* restore cursor position */
 		private const byte NL = 3;    /* new line */
@@ -110,17 +106,21 @@ namespace Open3270.TN3270
 		private const byte G2 = 51;   /* select G2 character set */
 		private const byte G3 = 52;   /* select G3 character set */
 		private const byte S2 = 53;   /* select G2 for next character */
-		private const byte S3 = 54;	  /* select G3 for next character */
-
-        private AnsiDelegate[] ansi_fn;
-
-		private readonly object[] st = new object[7];///*vok*/static byte st[7][256] = {
-
-		private int saved_cursor = 0;
+		private const byte S3 = 54;   /* select G3 for next character */
 		private const int NN = 20;
-		private readonly int[] n = new int[NN];
-		private int nx = 0;
 		private const int NT = 256;
+		private const string gnnames = "()*+";
+		private const string csnames = "0AB";
+
+		private readonly Telnet telnet;
+		private readonly object[] st = new object[7];///*vok*/static byte st[7][256] = {
+		private readonly int[] n = new int[NN];
+		private readonly int[] csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
+		private readonly int[] saved_csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
+
+		private AnsiDelegate[] ansi_fn;
+		private int saved_cursor = 0;
+		private int nx = 0;
 		private string text;//char     text[NT + 1];
 		private int tx = 0;
 		private char ansi_ch;
@@ -132,8 +132,6 @@ namespace Open3270.TN3270
 		private byte saved_bg = 0;
 		private int cset = CS_G0;
 		private int saved_cset = CS_G0;
-		private readonly int[] csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
-		private readonly int[] saved_csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
 		private int once_cset = -1;
 		private bool ansi_insert_mode = false;
 		private bool auto_newline_mode = false;
@@ -149,16 +147,11 @@ namespace Open3270.TN3270
 		private bool saved_wide_mode = false;
 		private bool saved_altbuffer = false;
 		private int scroll_top = -1;
-
 		private int scroll_bottom = -1;
 		private byte[] tabs = null;
-		private const string gnnames = "()*+";
-		private const string csnames = "0AB";
 		private int cs_to_change;
 		private bool held_wrap = false;
-
 		private AnsiState state;
-
 		private bool ansi_reset__first = false;
 
 		internal Ansi(Telnet telnet)
