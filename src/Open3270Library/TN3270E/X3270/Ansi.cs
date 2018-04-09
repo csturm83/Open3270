@@ -44,20 +44,13 @@ namespace Open3270.TN3270
 	/// </summary>
     internal class Ansi:IDisposable
     {
-        Telnet telnet;
-        internal Ansi(Telnet telnet)
-        {
-
-            this.telnet = telnet;
-            Initialize_ansi_fn();
-            InitializeST();
-        }
+        private Telnet telnet;
+        
         private const int CS_G0 = 0;
 		private const int CS_G1 = 1;
 		private const int CS_G2 = 2;
 		private const int CS_G3 = 3;
-
-
+		
 		private const int CSD_LD = 0;
 		private const int CSD_UK = 1;
 		private const int CSD_US = 2;
@@ -120,9 +113,65 @@ namespace Open3270.TN3270
 		private byte S3 = 54;	/* select G3 for next character */
 
         private AnsiDelegate[] ansi_fn;
-        private void Initialize_ansi_fn()
-        {
-            ansi_fn = new AnsiDelegate[] {
+        
+        private object[] st = new object[7];///*vok*/static byte st[7][256] = {
+
+		private int saved_cursor = 0;
+		private const int NN = 20;
+		private int[] n = new int[NN];
+		private int nx = 0;
+		private const int NT = 256;
+		private string text;//char     text[NT + 1];
+		private int tx = 0;
+		private char ansi_ch;
+		private byte gr = 0;
+		private byte saved_gr = 0;
+		private byte fg = 0;
+		private byte saved_fg = 0;
+		private byte bg = 0;
+		private byte saved_bg = 0;
+		private int cset = CS_G0;
+		private int saved_cset = CS_G0;
+		private int[] csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
+		private int[] saved_csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
+		private int once_cset = -1;
+		private bool ansi_insert_mode = false;
+		private bool auto_newline_mode = false;
+		private int appl_cursor = 0;
+		private int saved_appl_cursor = 0;
+		private bool wraparound_mode = true;
+		private bool saved_wraparound_mode = true;
+		private bool rev_wraparound_mode = false;
+		private bool saved_rev_wraparound_mode = false;
+		private bool allow_wide_mode = false;
+		private bool saved_allow_wide_mode = false;
+		private bool wide_mode = false;
+		private bool saved_wide_mode = false;
+		private bool saved_altbuffer = false;
+		private int scroll_top = -1;
+
+		private int scroll_bottom = -1;
+		private byte[] tabs = null;
+		private string gnnames = "()*+";
+		private string csnames = "0AB";
+		private int cs_to_change;
+		private bool held_wrap = false;
+
+		private AnsiState state;
+
+		private bool ansi_reset__first = false;
+
+		internal Ansi(Telnet telnet)
+		{
+
+			this.telnet = telnet;
+			Initialize_ansi_fn();
+			InitializeST();
+		}
+
+		private void Initialize_ansi_fn()
+		{
+			ansi_fn = new AnsiDelegate[] {
 
 
 											 /* 0 */		new AnsiDelegate(ansi_data_mode),
@@ -181,16 +230,14 @@ namespace Open3270.TN3270
 											 /* 53 */	new AnsiDelegate(ansi_one_g2),
 											 /* 54 */	new AnsiDelegate(ansi_one_g3)
 										 };
-        }
+		}
 
-        private object[] st = new object[7];///*vok*/static byte st[7][256] = {
-
-        private void InitializeST()
-        {
-            /*
+		private void InitializeST()
+		{
+			/*
              * State table for base processing (state == DATA)
              */
-            st[0] = new byte[] {
+			st[0] = new byte[] {
 								   /* 0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  */
 								   /* 00 */       Xx,Xx,Xx,Xx,Xx,Xx,Xx,BL,BS,HT,LF,LF,NP,CR,G1,G0,
 								   /* 10 */       Xx,Xx,Xx,Xx,Xx,Xx,Xx,Xx,Xx,Xx,Xx,E1,Xx,Xx,Xx,Xx,
@@ -210,10 +257,10 @@ namespace Open3270.TN3270
 								   /* f0 */       Pc,Pc,Pc,Pc,Pc,Pc,Pc,Pc,Pc,Pc,Pc,Pc,Pc,Pc,Pc,Pc
 							   };
 
-            /*
+			/*
              * State table for ESC processing (state == ESC)
              */
-            st[1] = new byte[] {
+			st[1] = new byte[] {
 								   /* 0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  */
 								   /* 00 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 								   /* 10 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -233,10 +280,10 @@ namespace Open3270.TN3270
 								   /* f0 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 							   };
 
-            /*
+			/*
              * State table for ESC ()*+ C processing (state == CSDES)
              */
-            st[2] = new byte[] {
+			st[2] = new byte[] {
 								   /* 0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  */
 								   /* 00 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 								   /* 10 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -256,10 +303,10 @@ namespace Open3270.TN3270
 								   /* f0 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 							   };
 
-            /*
+			/*
              * State table for ESC [ processing (state == N1)
              */
-            st[3] = new byte[] {
+			st[3] = new byte[] {
 								   /* 0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  */
 								   /* 00 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 								   /* 10 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -279,10 +326,10 @@ namespace Open3270.TN3270
 								   /* f0 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 							   };
 
-            /*
+			/*
              * State table for ESC [ ? processing (state == DECP)
              */
-            st[4] = new byte[] {
+			st[4] = new byte[] {
 								   /* 0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  */
 								   /* 00 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 								   /* 10 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -302,10 +349,10 @@ namespace Open3270.TN3270
 								   /* f0 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 							   };
 
-            /*
+			/*
              * State table for ESC ] processing (state == TEXT)
              */
-            st[5] = new byte[] {
+			st[5] = new byte[] {
 								   /* 0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  */
 								   /* 00 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 								   /* 10 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -325,10 +372,10 @@ namespace Open3270.TN3270
 								   /* f0 */	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 							   };
 
-            /*
+			/*
              * State table for ESC ] n ; processing (state == TEXT2)
              */
-            st[6] = new byte[] {
+			st[6] = new byte[] {
 								   /* 0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  */
 								   /* 00 */        0, 0, 0, 0, 0, 0, 0,TB, 0, 0, 0, 0, 0, 0, 0, 0,
 								   /* 10 */        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -347,57 +394,11 @@ namespace Open3270.TN3270
 								   /* e0 */       TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,
 								   /* f0 */       TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX,TX
 							   };
-        }
+		}
 
+		//static void	ansi_scroll();
 
-		private int saved_cursor = 0;
-		private const int NN = 20;
-		private int[] n = new int[NN];
-		private int nx = 0;
-		private const int NT = 256;
-		private string text;//char     text[NT + 1];
-		private int tx = 0;
-		private char ansi_ch;
-		private byte gr = 0;
-		private byte saved_gr = 0;
-		private byte fg = 0;
-		private byte saved_fg = 0;
-		private byte bg = 0;
-		private byte saved_bg = 0;
-		private int cset = CS_G0;
-		private int saved_cset = CS_G0;
-		private int[] csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
-		private int[] saved_csd = new int[] { CSD_US, CSD_US, CSD_US, CSD_US };
-		private int once_cset = -1;
-		private bool ansi_insert_mode = false;
-		private bool auto_newline_mode = false;
-		private int appl_cursor = 0;
-		private int saved_appl_cursor = 0;
-		private bool wraparound_mode = true;
-		private bool saved_wraparound_mode = true;
-		private bool rev_wraparound_mode = false;
-		private bool saved_rev_wraparound_mode = false;
-		private bool allow_wide_mode = false;
-		private bool saved_allow_wide_mode = false;
-		private bool wide_mode = false;
-		private bool saved_wide_mode = false;
-		private bool saved_altbuffer = false;
-		private int scroll_top = -1;
-
-		private int scroll_bottom = -1;
-		private byte[] tabs = null;
-		private string gnnames = "()*+";
-		private string csnames = "0AB";
-		private int cs_to_change;
-		private bool held_wrap = false;
-
-		private AnsiState state;
-
-
-
-        //static void	ansi_scroll();
-
-        AnsiState ansi_data_mode(int ig1, int ig2)
+		AnsiState ansi_data_mode(int ig1, int ig2)
         {
             return AnsiState.DATA;
         }
@@ -469,8 +470,7 @@ namespace Open3270.TN3270
             nx = 0;
             return AnsiState.N1;
         }
-
-        private bool ansi_reset__first = false;
+		
         AnsiState ansi_reset(int ig1, int ig2)
         {
             int i;
